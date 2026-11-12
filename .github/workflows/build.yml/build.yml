@@ -1,0 +1,52 @@
+name: Build WASEET AL-KHAIR APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            git zip unzip \
+            autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev \
+            libffi-dev libssl-dev \
+            libltdl-dev cmake
+
+      - name: Install Buildozer
+        run: |
+          pip install --upgrade pip
+          pip install buildozer
+          pip install cython==0.29.33
+
+      - name: Build APK
+        run: |
+          buildozer android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: WASEET-AL-KHAIR-APK
+          path: bin/*.apk
